@@ -2,3 +2,6 @@
 *.tgz
 experiments/
 lightning_logs/
+emotion_classifier/
+MNIST/
+*.ckpt
