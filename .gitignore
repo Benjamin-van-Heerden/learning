@@ -6,3 +6,4 @@ emotion-classifier/
 MNIST/
 *.ckpt
 node_modules
+.env
