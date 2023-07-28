@@ -6,5 +6,8 @@
 		<li>
 			<a href="read_solana">1. Read from the solana network</a>
 		</li>
+		<li>
+			<a href="connect_to_wallet">2. Connect to a wallet</a>
+		</li>
 	</ul>
 </div>
