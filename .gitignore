@@ -8,3 +8,4 @@ MNIST/
 node_modules
 .env
 wandb/
+CIFAR10/
