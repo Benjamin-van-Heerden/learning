@@ -7,3 +7,4 @@ MNIST/
 *.ckpt
 node_modules
 .env
+wandb/
