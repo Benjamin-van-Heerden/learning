@@ -64,14 +64,3 @@
 		{/if}
 	{/if}
 </div>
-
-<style>
-	:global(.wallet-adapter-modal-button-close) {
-		border-radius: 10px;
-		width: 20%;
-	}
-
-	:global(.wallet-adapter-modal li) {
-		list-style: none;
-	}
-</style>
