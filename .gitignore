@@ -10,3 +10,4 @@ node_modules
 wandb/
 CIFAR10/
 .venv/
+debugging/
