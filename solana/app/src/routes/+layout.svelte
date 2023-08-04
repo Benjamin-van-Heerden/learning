@@ -15,7 +15,7 @@
 	let wallets = [new PhantomWalletAdapter()]
 </script>
 
-<WalletProvider {localStorageKey} {wallets} />
+<WalletProvider {localStorageKey} {wallets} autoConnect />
 <ConnectionProvider {network} />
 <main class="p-4">
 	<nav class="flex w-full justify-end">

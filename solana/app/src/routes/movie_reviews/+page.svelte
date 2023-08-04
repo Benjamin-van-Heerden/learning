@@ -11,13 +11,6 @@
 		borsh.str("description")
 	])
 
-	const movieAccountSchema = borsh.struct([
-		borsh.bool("initialized"),
-		borsh.u8("rating"),
-		borsh.str("title"),
-		borsh.str("description")
-	])
-
 	function createBuffer(title: string, rating: number, description: string, variant: number = 0) {
 		let buffer = Buffer.alloc(1000) // allocate buffer
 		movieInstructionSchema.encode({ variant, title, rating, description }, buffer) // encode instruction data into buffer
@@ -28,7 +21,7 @@
 
 	import { walletStore } from "@svelte-on-solana/wallet-adapter-core"
 	let title = ""
-	let rating: number
+	let rating: number = -1
 	let description = ""
 	let result = ""
 
@@ -76,6 +69,48 @@
 			loading = false
 		}
 	}
+
+	const movieAccountSchema = borsh.struct([
+		borsh.bool("initialized"),
+		borsh.u8("rating"),
+		borsh.str("title"),
+		borsh.str("description")
+	])
+
+	// Remember, the order here matters. It needs to match how the account data is structured.
+	// Solana programs will not understand the data if it's not in the right order.
+
+	type MovieData = {
+		title: string
+		rating: number
+		description: string
+	}
+
+	function deserializeMovieAccount(data?: Buffer): undefined | MovieData {
+		if (!data) return
+
+		try {
+			const { title, rating, description } = movieAccountSchema.decode(data)
+			return { title, rating, description }
+		} catch (error) {
+			console.error(error)
+		}
+	}
+
+	let movies: any[] = []
+	async function getMovies() {
+		const connection = new web3.Connection(web3.clusterApiUrl("devnet"))
+		const movieProgramId = new web3.PublicKey(MOVIE_PROGRAM_ID)
+		const movieProgramAccounts = await connection.getProgramAccounts(movieProgramId)
+		movies = movieProgramAccounts.map((account) => {
+			const data = deserializeMovieAccount(account.account.data)
+			if (!data) return
+			const { title, rating, description } = data
+			return { title, rating, description }
+		})
+		// filter out undefined values
+		movies = movies.filter((movie) => movie)
+	}
 </script>
 
 <div class="container flex flex-col">
@@ -84,7 +119,31 @@
 	</nav>
 	{#if $walletStore.publicKey}
 		<p>Connected with wallet address: <strong>{$walletStore.publicKey}</strong></p>
-		<div class="mt-4 flex flex-col space-y-2">
+		<div class="flex flex-col space-y-2">
+			<h3 class="mb-2">Get past reviews</h3>
+			<button
+				on:click={() => {
+					loading = true
+					getMovies().then(() => (loading = false))
+				}}
+				aria-busy={loading}
+				disabled={loading}>Get reviews</button
+			>
+			{#if movies.length === 0}
+				<p class="!mb-4 !mt-4">No reviews loaded</p>
+			{:else}
+				<details class="!mb-4 !mt-4 !space-y-2">
+					<summary>Show reviews</summary>
+					{#each movies as movie}
+						<div class="flex flex-col space-y-2 rounded-md border-2 border-white p-4">
+							<h4 class="mb-0 underline">{movie.title}</h4>
+							<p>Rating: {movie.rating}</p>
+							<p>Description: {movie.description}</p>
+						</div>
+					{/each}
+				</details>
+			{/if}
+			<h3 class="mb-2">Submit a review</h3>
 			<label for="name">Movie name</label>
 			<input id="name" type="text" bind:value={title} />
 			<label for="rating">Rating</label>
